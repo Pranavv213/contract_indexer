@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Universal AI-Powered Smart Contract Indexer & Chatbot
-Hardcoded configuration - Just the chatbot CLI
+With SQL Query Display for Debugging
 """
 
 import json
@@ -27,55 +27,33 @@ init(autoreset=True)
 # HARDCODED CONFIGURATION - CHANGE THESE!
 # ============================================
 
-# ===== BLOCKCHAIN CONFIGURATION =====
-CONTRACT_ADDRESS = "0x99D690a96377238633cEA9262944bd0F2f9CaAd4"  # ← CHANGE THIS
-RPC_URL = "https://sepolia.drpc.org"  # Change for different chains
-
-# ===== AI CONFIGURATION =====
+CONTRACT_ADDRESS = "0xc405384710fcEE54E391ce4eb9967FDD38Ab16B3"
+RPC_URL = "https://sepolia.drpc.org"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 LLM_MODEL = "llama3.2:3b"
-
-# ===== DATABASE =====
 DB_FILE = "contract_indexer.db"
 
 # ============================================
-# HARDCODED ABI - REPLACE WITH YOUR CONTRACT ABI
+# CONTRACT ABI - Replace with yours
 # ============================================
 
 CONTRACT_ABI = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "_task",
+        "type": "string"
       }
     ],
-    "name": "approve",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
+    "name": "addTodo",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      }
-    ],
-    "name": "burn",
+    "inputs": [],
+    "name": "deleteLatestTodo",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -83,17 +61,12 @@ CONTRACT_ABI = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "value",
+        "name": "_index",
         "type": "uint256"
       }
     ],
-    "name": "burnFrom",
+    "name": "deleteTodo",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -101,126 +74,20 @@ CONTRACT_ABI = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
       },
       {
-        "internalType": "address",
-        "name": "initialOwner",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "_age",
+        "type": "uint256"
       }
     ],
+    "name": "registerUser",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "allowance",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "needed",
-        "type": "uint256"
-      }
-    ],
-    "name": "ERC20InsufficientAllowance",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "balance",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "needed",
-        "type": "uint256"
-      }
-    ],
-    "name": "ERC20InsufficientBalance",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "approver",
-        "type": "address"
-      }
-    ],
-    "name": "ERC20InvalidApprover",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "receiver",
-        "type": "address"
-      }
-    ],
-    "name": "ERC20InvalidReceiver",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      }
-    ],
-    "name": "ERC20InvalidSender",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      }
-    ],
-    "name": "ERC20InvalidSpender",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnableInvalidOwner",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "OwnableUnauthorizedAccount",
-    "type": "error"
+    "type": "function"
   },
   {
     "anonymous": False,
@@ -228,42 +95,18 @@ CONTRACT_ABI = [
       {
         "indexed": True,
         "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "indexed": True,
-        "internalType": "address",
-        "name": "spender",
+        "name": "userAddress",
         "type": "address"
       },
       {
         "indexed": False,
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "task",
+        "type": "string"
       }
     ],
-    "name": "Approval",
+    "name": "TodoAdded",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "mint",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   },
   {
     "anonymous": False,
@@ -271,113 +114,28 @@ CONTRACT_ABI = [
       {
         "indexed": True,
         "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": True,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      }
-    ],
-    "name": "transfer",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "anonymous": False,
-    "inputs": [
-      {
-        "indexed": True,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": True,
-        "internalType": "address",
-        "name": "to",
+        "name": "userAddress",
         "type": "address"
       },
       {
         "indexed": False,
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "task",
+        "type": "string"
       }
     ],
-    "name": "Transfer",
+    "name": "TodoDeleted",
     "type": "event"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "value",
+        "name": "_newAge",
         "type": "uint256"
       }
     ],
-    "name": "transferFrom",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
+    "name": "updateUserAge",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -385,22 +143,67 @@ CONTRACT_ABI = [
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "_newName",
+        "type": "string"
+      }
+    ],
+    "name": "updateUserName",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": False,
+    "inputs": [
+      {
+        "indexed": True,
         "internalType": "address",
-        "name": "owner",
+        "name": "userAddress",
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
+        "indexed": False,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": False,
+        "internalType": "uint256",
+        "name": "age",
+        "type": "uint256"
       }
     ],
-    "name": "allowance",
+    "name": "UserRegistered",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "getAllRegisteredUsers",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address[]",
         "name": "",
-        "type": "uint256"
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllTodosWithIndices",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
       }
     ],
     "stateMutability": "view",
@@ -410,55 +213,21 @@ CONTRACT_ABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
+        "name": "_address",
         "type": "address"
       }
     ],
-    "name": "balanceOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "decimals",
-    "outputs": [
-      {
-        "internalType": "uint8",
-        "name": "",
-        "type": "uint8"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "name",
+    "name": "getPublicUserInfo",
     "outputs": [
       {
         "internalType": "string",
         "name": "",
         "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
+      },
       {
-        "internalType": "address",
+        "internalType": "bool",
         "name": "",
-        "type": "address"
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -466,25 +235,147 @@ CONTRACT_ABI = [
   },
   {
     "inputs": [],
-    "name": "symbol",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalSupply",
+    "name": "getTodosCount",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getTodosCountByAddress",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUserCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUserInfo",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserInfoByAddress",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUserTodos",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserTodosByAddress",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "isUserRegistered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -493,15 +384,16 @@ CONTRACT_ABI = [
 ]
 
 # ============================================
-# DATABASE MANAGER
+# DATABASE MANAGER WITH SQL QUERY DISPLAY
 # ============================================
 
 class DatabaseManager:
-    """Manages SQLite database operations"""
+    """Manages SQLite database operations with SQL query display"""
     
     def __init__(self, db_file: str):
         self.db_file = db_file
         self.connection = None
+        self.show_sql = True  # Set to False to hide SQL queries
         self.connect()
     
     def connect(self):
@@ -515,8 +407,30 @@ class DatabaseManager:
             print(f"{Fore.RED}❌ Failed to connect to SQLite: {e}{Style.RESET_ALL}")
             sys.exit(1)
     
-    def execute(self, query: str, params: tuple = None):
-        """Execute a query and return results"""
+    def execute(self, query: str, params: tuple = None, show_query: bool = True):
+        """
+        Execute a query and return results with optional SQL display
+        
+        Args:
+            query: SQL query string
+            params: Query parameters (optional)
+            show_query: Whether to display the SQL (overrides self.show_sql)
+        """
+        # Display the SQL query
+        if show_query and self.show_sql:
+            print(f"\n{Fore.YELLOW}📝 SQL Query:{Style.RESET_ALL}")
+            # Format the query for display
+            formatted_query = query.strip()
+            if params:
+                # Show parameters
+                print(f"{Fore.CYAN}   {formatted_query}{Style.RESET_ALL}")
+                print(f"{Fore.MAGENTA}   Parameters: {params}{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.CYAN}   {formatted_query}{Style.RESET_ALL}")
+            
+            # Add a separator
+            print(f"{Fore.BLACK}{'─'*60}{Style.RESET_ALL}")
+        
         cursor = self.connection.cursor()
         try:
             if params:
@@ -527,14 +441,27 @@ class DatabaseManager:
             if query.strip().upper().startswith('SELECT'):
                 results = cursor.fetchall()
                 cursor.close()
+                
+                # Show result count
+                if show_query and self.show_sql:
+                    print(f"{Fore.GREEN}   ✅ Returned {len(results)} rows{Style.RESET_ALL}")
+                
                 return [dict(row) for row in results]
             else:
                 self.connection.commit()
+                rows_affected = cursor.rowcount
                 cursor.close()
-                return cursor.rowcount
+                
+                # Show rows affected
+                if show_query and self.show_sql:
+                    print(f"{Fore.GREEN}   ✅ {rows_affected} rows affected{Style.RESET_ALL}")
+                
+                return rows_affected
         except Exception as e:
             self.connection.rollback()
             cursor.close()
+            if show_query and self.show_sql:
+                print(f"{Fore.RED}   ❌ Error: {e}{Style.RESET_ALL}")
             raise e
     
     def create_tables(self, contract_address: str, abi: List[Dict]):
@@ -660,7 +587,7 @@ class DatabaseManager:
         return 'TEXT'
     
     def store_event(self, contract_address: str, event_name: str, event_data):
-        """Store an event in the database"""
+        """Store an event in the database with SQL display"""
         try:
             args = dict(event_data.args)
             table_name = f"event_{event_name.lower()}"
@@ -698,20 +625,20 @@ class DatabaseManager:
             print(f"{Fore.RED}❌ Error storing event {event_name}: {e}{Style.RESET_ALL}")
     
     def get_cached_query(self, contract_address: str, query: str) -> Optional[Dict]:
-        """Get cached query result"""
+        """Get cached query result with SQL display"""
         query_hash = hashlib.md5(f"{contract_address}_{query}".encode()).hexdigest()
         
         results = self.execute("""
             SELECT result FROM query_cache 
             WHERE query_hash = ? AND expires_at > datetime('now')
-        """, (query_hash,))
+        """, (query_hash,), show_query=True)
         
         if results:
             return json.loads(results[0]['result'])
         return None
     
     def cache_query(self, contract_address: str, query: str, result: Any):
-        """Cache query result"""
+        """Cache query result with SQL display"""
         query_hash = hashlib.md5(f"{contract_address}_{query}".encode()).hexdigest()
         
         self.execute("""
@@ -723,34 +650,34 @@ class DatabaseManager:
             query_hash,
             query,
             json.dumps(result)
-        ))
+        ), show_query=True)
     
     def get_sync_status(self, contract_address: str) -> Dict:
-        """Get synchronization status"""
+        """Get synchronization status with SQL display"""
         results = self.execute("""
             SELECT last_synced_block, total_events, updated_at
             FROM contracts 
             WHERE contract_address = ?
-        """, (contract_address,))
+        """, (contract_address,), show_query=False)
         
         if results:
             return dict(results[0])
         return {'last_synced_block': 0, 'total_events': 0, 'updated_at': None}
     
     def get_db_info(self) -> Dict:
-        """Get database information"""
+        """Get database information with SQL display"""
         tables = self.execute("""
             SELECT name FROM sqlite_master 
             WHERE type='table' 
             ORDER BY name
-        """)
+        """, show_query=False)
         
         total_tables = len(tables)
         
         events_count = self.execute("""
             SELECT SUM(total_events) as total 
             FROM contracts
-        """)
+        """, show_query=False)
         
         total_events = events_count[0]['total'] if events_count and events_count[0]['total'] else 0
         
@@ -1360,6 +1287,7 @@ class Chatbot:
         print(f"   • /history - Show query history")
         print(f"   • /clear - Clear history")
         print(f"   • /dbinfo - Show database info")
+        print(f"   • /sql - Toggle SQL query display")
         print(f"   • /exit - Exit chatbot")
         print(f"\n{Fore.GREEN}Ready for queries!{Style.RESET_ALL}\n")
     
@@ -1391,6 +1319,12 @@ class Chatbot:
                 
                 if query.lower() == '/dbinfo':
                     self._show_db_info()
+                    continue
+                
+                if query.lower() == '/sql':
+                    self.db.show_sql = not self.db.show_sql
+                    status = "ON" if self.db.show_sql else "OFF"
+                    print(f"{Fore.GREEN}✅ SQL Query Display: {status}{Style.RESET_ALL}")
                     continue
                 
                 result = self.query_engine.query(query)
@@ -1480,6 +1414,7 @@ class Chatbot:
         print(f"   • /history - Show query history")
         print(f"   • /clear - Clear history")
         print(f"   • /dbinfo - Show database info")
+        print(f"   • /sql - Toggle SQL query display")
         print(f"   • /exit - Exit chatbot")
         print(f"{Fore.GREEN}{'─'*70}{Style.RESET_ALL}\n")
     
@@ -1513,7 +1448,7 @@ class Chatbot:
             print(f"\n{Fore.WHITE}Tables:{Style.RESET_ALL}")
             for table in db_info['tables']:
                 try:
-                    count = self.db.execute(f"SELECT COUNT(*) as count FROM {table}")
+                    count = self.db.execute(f"SELECT COUNT(*) as count FROM {table}", show_query=False)
                     row_count = count[0]['count'] if count else 0
                     print(f"   • {Fore.GREEN}{table}{Style.RESET_ALL} ({row_count} rows)")
                 except:
@@ -1526,11 +1461,11 @@ class Chatbot:
 # ============================================
 
 def main():
-    """Main application - Hardcoded config + Chatbot CLI"""
+    """Main application - Hardcoded config + Chatbot CLI with SQL display"""
     print(f"{Fore.CYAN}{'='*70}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}🚀 UNIVERSAL AI SMART CONTRACT INDEXER & CHATBOT{Style.RESET_ALL}")
     print(f"{Fore.CYAN}{'='*70}{Style.RESET_ALL}")
-    print(f"{Fore.YELLOW}Version: 1.0.0 (Hardcoded Config){Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Version: 1.0.0 (SQL Display Enabled){Style.RESET_ALL}")
     print(f"{Fore.CYAN}{'='*70}{Style.RESET_ALL}")
     
     print(f"\n{Fore.GREEN}📋 Configuration:{Style.RESET_ALL}")
@@ -1538,6 +1473,7 @@ def main():
     print(f"   RPC: {Fore.WHITE}{RPC_URL}{Style.RESET_ALL}")
     print(f"   Database: {Fore.WHITE}{DB_FILE}{Style.RESET_ALL}")
     print(f"   AI Model: {Fore.WHITE}{LLM_MODEL}{Style.RESET_ALL}")
+    print(f"   SQL Display: {Fore.WHITE}ON (/sql to toggle){Style.RESET_ALL}")
     
     # Initialize database
     db = DatabaseManager(DB_FILE)
